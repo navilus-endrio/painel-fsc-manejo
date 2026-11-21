@@ -1192,6 +1192,16 @@ th.sortable[aria-sort="descending"]::after { content: ' \2193'; opacity: 1; }
       <h2>A novidade: proteção de PFI</h2>
       <p class="lede">Paisagens Florestais Intactas passaram a ter regras quantitativas dentro da Unidade de Manejo, com limiares que variam conforme a aptidão da bacia hidrográfica.</p>
     </header>
+    <div class="panel" style="margin-bottom:18px">
+      <h3>Em resumo: o que é o Anexo H e por que a PFI importa</h3>
+      <div class="grid3" style="margin-top:14px">
+        <div class="avc a1"><h3>O que é o Anexo H</h3><p class="muted" style="margin-top:6px;font-size:15px">Parte da norma (p. 106–110) que diz <b>quanto da PFI dentro da UMF</b> deve ser protegido, conforme a região. Traz as 16 paisagens (bacias), sua classificação em muito apta, apta ou pouco apta, o procedimento de aplicação e o mapa. Nasceu da Moção 23/2020, que pediu proteção de PFI na <b>paisagem mais ampla</b>.</p></div>
+        <div class="avc a2"><h3>Por que a PFI importa</h3><p class="muted" style="margin-top:6px;font-size:15px">É um bloco de floresta com pelo menos 50.000 ha e 10 km de largura, minimamente influenciado pela atividade humana. Compõe o <b>AVC 2</b> (paisagem, grandes ecossistemas, populações viáveis de espécies). O Brasil tem 220,53 Mha de PFI, 99,1% na Amazônia.</p></div>
+        <div class="avc a3"><h3>O que as porcentagens significam</h3><p class="muted" style="margin-top:6px;font-size:15px">É <b>preservação</b>, mas só de uma fração da PFI que cai dentro da UMF: percentual × área de PFI. Com 1.000 ha de PFI e classe apta (20%), <b>200 ha viram área central</b>, sem exploração. O resto pode ser manejado fora da área central, com EIR.</p></div>
+      </div>
+      <p class="muted" style="margin-top:12px">Quanto mais ameaçada a paisagem, maior o percentual: <b>10%</b> onde há muita PFI e muita área protegida por lei, <b>20%</b> em situação intermediária, <b>30%</b> no Alto Paraguai (muita pressão, pouca proteção) e <b>51%</b> como regra padrão fora da Amazônia Legal. Esse é <b>um dos critérios</b> do Princípio 9; também contam o mapeamento da PFI (9.1.2), a conectividade (9.2.7) e a esfera de influência (9.2.8).</p>
+      <p class="src">Anexo H, p. 106–110; indicadores 9.1.2 e 9.2.4–9.2.8 (p. 56–59); glossário (p. 123).</p>
+    </div>
     <div class="callout"><b>O que mudou:</b> de “identificar e proteger o AVC 2” para exigências objetivas nos indicadores 9.1.2, 9.2.4.1, 9.2.5, 9.2.7 e 9.2.8, detalhadas no Anexo H.</div>
     <div class="grid2" style="margin-bottom:18px">
       <div class="panel">
@@ -1350,6 +1360,7 @@ th.sortable[aria-sort="descending"]::after { content: ' \2193'; opacity: 1; }
           <div class="track"><div class="fill" id="calc-fill" style="width:20%"></div></div>
         </div>
       </div>
+      <p class="muted" id="calc-umf" aria-live="polite" hidden style="margin-top:10px;font-size:15px"></p>
       <p class="src">Se a UMF abranger mais de uma classe, calcule proporcionalmente à área de cobertura de cada classe (Anexo H, p. 109).</p>
     </div>
     <div class="panel" style="margin-top:18px">
@@ -2038,7 +2049,7 @@ function finishDraw(){
 }
 function clearUMF(){
   UMF=null; if(umfLayer){ map.removeLayer(umfLayer); umfLayer=null; } if(draft){ map.removeLayer(draft); draft=null; }
-  verts=[]; btn('umf-clear',false); $('umf-report').hidden=true; $('umf-report').innerHTML='';
+  verts=[]; btn('umf-clear',false); $('umf-report').hidden=true; $('umf-report').innerHTML=''; $('calc-umf').hidden=true;
 }
 $('umf-clear').addEventListener('click',()=>{ clearUMF(); calcPFI(); });
 $('umf-file').addEventListener('change',async e=>{
@@ -2081,7 +2092,13 @@ function useUMF(mp){
   const share=aU?100*aPfi/aU:0;
   const act=rows.filter(r=>r.a>0);
   const dom=act.length?act.reduce((a,b)=>b.a>a.a?b:a):null;
-  const sel=dom?String(dom.p):'20';
+  // landscape class where the whole UMF falls (dominant by area, not only by PFI)
+  const aLeg=Math.min(aU,mpArea(clipI(near(GEO.legal,bb),mp)));
+  const uc={10:0,20:0,30:0,51:Math.max(0,aU-aLeg)}; let sU=0;
+  for(const k of ['1','2','3']){ const a=mpArea(clipI(near(GEO.cls[k],bb),mp)); uc[PCT_OF[k]]+=a; sU+=a; }
+  uc[20]+=Math.max(0,aLeg-sU);               // inside Legal Amazon but no class in the figure: Apta
+  const uTop=Object.keys(uc).reduce((a,b)=>uc[b]>uc[a]?b:a);
+  const sel=aU?uTop:'20';
   UMF={ha:Math.round(pfiHa*10)/10,sel,res:centralHa,pctEff:pfiHa?100*centralHa/pfiHa:0};
   const rep=$('umf-report');
   rep.innerHTML=`<h4>UMF desenhada · ${fmtN(ha(aU))} ha</h4>`+
@@ -2093,6 +2110,12 @@ function useUMF(mp){
    `<p class="warn">Triagem: IFL simplificado (~1 km) e Apta/Pouco apta vetorizadas da figura (~10 km). A calculadora acima recebeu a PFI e o mínimo proporcional (Anexo H, p. 109); se você editar a classe ou a área, ela volta ao modo manual.${aNone?' Há PFI sem classe na figura, contada como 20%.':''}</p>`;
   rep.hidden=false; $('map-read').innerHTML=`<h4>UMF medida</h4><p>Resultado e quadro por classe logo abaixo do mapa.</p>`;
   $('calc-classe').value=sel; $('calc-area').value=UMF.ha; calcPFI();
+  const NM={10:'Muito apta',20:'Apta',30:'Pouco apta',51:'Fora da Amazônia Legal'};
+  const nCls=Object.keys(uc).filter(k=>uc[k]/aU>0.005).length;
+  const cu=$('calc-umf'); cu.hidden=false;
+  cu.innerHTML=`<b>UMF carregada:</b> ${fmtN(ha(aU))} ha · classe da paisagem: <b>${NM[sel]} (${sel}%)</b>, ${fmtN(100*uc[sel]/aU)}% da UMF · PFI dentro da UMF: <b>${fmtN(pfiHa)} ha</b>`+
+   (nCls>1?'. A UMF cruza mais de uma classe: o mínimo é calculado proporcionalmente sobre a PFI (Anexo H, p. 109), e a norma pede a paisagem predominante.':'')+
+   (pfiHa?'':'. Sem PFI na UMF, a área central mínima é 0 ha.');
 }
 
 calcPFI();
