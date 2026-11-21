@@ -2264,4 +2264,71 @@ flowSelect('start', false);
 </script>
 
 
+<style>
+abbr.sg{text-decoration:underline dotted;text-underline-offset:2px;cursor:help}
+.sgnote{display:block;margin-top:6px;font-size:11.5px;line-height:1.4;font-weight:400;letter-spacing:0;text-transform:none;text-align:left;color:var(--muted);opacity:.9}
+.sgnote i{font-style:normal;font-weight:600}
+</style>
+<script>
+/* Inline acronym notes: wraps each acronym in <abbr title> and adds a small note listing the meanings in its card/paragraph. */
+(function(){
+  const DEF={
+    'PFI':'Paisagem Florestal Intacta','AVC':'Atributo de Alto Valor de Conservação','UMF':'Unidade de Manejo Florestal',
+    'SLIMF':'Small and Low Intensity Managed Forests (florestas de pequena escala ou baixa intensidade)','FSC':'Forest Stewardship Council',
+    'PFNM':'Produto Florestal Não Madeireiro','CAP':'Corte Anual Permitido','EIR':'Exploração de Impacto Reduzido','RIL':'Reduced Impact Logging (= EIR)',
+    'CAN':'Rede de Áreas de Conservação','IMA':'Incremento Médio Anual','APP':'Área de Preservação Permanente','PMFS':'Plano de Manejo Florestal Sustentável',
+    'UC':'Unidade de Conservação','OIT':'Organização Internacional do Trabalho','GFW':'Global Forest Watch','SIG':'Sistema de Informações Geográficas',
+    'MMA':'Ministério do Meio Ambiente e Mudança do Clima','ICMBio':'Instituto Chico Mendes de Conservação da Biodiversidade',
+    'CONAMA':'Conselho Nacional do Meio Ambiente','PSC':'Policy and Standards Committee (comitê de políticas e normas do FSC)',
+    'BAU':'Business as Usual (cenário de continuidade)','WC':'Worst Case (pior cenário)','IFL':'Intact Forest Landscapes (Paisagens Florestais Intactas)',
+    'ANA':'Agência Nacional de Águas e Saneamento Básico','IBGE':'Instituto Brasileiro de Geografia e Estatística','CREA':'Conselho Regional de Engenharia e Agronomia'
+  };
+  const KEYS=Object.keys(DEF).sort((a,b)=>b.length-a.length);
+  const RE=new RegExp('(?<![\wÀ-ÿ-])('+KEYS.join('|')+')(?![\wÀ-ÿ])','g');
+  const SKIP='script,style,textarea,input,select,option,svg,abbr,.sgnote,nav,.top,#siglas,.leaflet-container,#umf-report,#map-read,#calc-umf,.legend,label,button:not(.jstep),summary,code,pre,a[href^="http"]';
+  const CARD='.jstep,.stage,.step,.panel,.card,.msg,.acao,tr,li,details,.strip>*';
+  const fold=t=>t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  let busy=false;
+  function run(){
+    if(busy) return; busy=true;
+    try{
+      const root=document.querySelector('main')||document.body, groups=new Map();
+      const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>{
+        if(!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        const p=n.parentElement; if(!p||p.closest(SKIP)) return NodeFilter.FILTER_REJECT;
+        RE.lastIndex=0; return RE.test(n.nodeValue)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;}});
+      const nodes=[]; while(w.nextNode()) nodes.push(w.currentNode);
+      for(const n of nodes){
+        const p=n.parentElement, box=p.closest(CARD)||p.closest('p,h2,h3,h4,div')||p;
+        const txt=n.nodeValue, frag=document.createDocumentFragment(); let last=0; RE.lastIndex=0; let m;
+        while((m=RE.exec(txt))){
+          frag.append(txt.slice(last,m.index));
+          const a=document.createElement('abbr'); a.className='sg'; a.title=DEF[m[1]]; a.textContent=m[1]; frag.append(a);
+          if(!groups.has(box)) groups.set(box,new Set()); groups.get(box).add(m[1]); last=m.index+m[1].length;
+        }
+        frag.append(txt.slice(last)); n.replaceWith(frag);
+      }
+      const seenFSC=new WeakSet();
+      for(const [box,set] of groups){
+        if(box.querySelector(':scope > .sgnote, :scope .sgnote')) continue;
+        const flat=fold(box.textContent), items=[];
+        for(const k of set){
+          const d=fold(DEF[k].split(' (')[0]);
+          if(flat.includes(d+' ('+fold(k)) || flat.includes(fold(k)+' ('+d)) continue;   // already expanded in the text
+          if(k==='RIL'&&set.has('EIR')) continue;
+          if(k==='FSC'){ const sec=box.closest('section')||document.body; if(seenFSC.has(sec)) continue; seenFSC.add(sec); }   // brand name: explain once per section
+          items.push('<i>'+k+'</i> '+DEF[k]);
+        }
+        if(!items.length) continue;
+        const note=document.createElement('small'); note.className='sgnote'; note.innerHTML=items.join(' · ');
+        (box.matches('li,p,td,h2,h3,h4')?box:box).append(note);
+      }
+    }finally{ busy=false; }
+  }
+  let t; const sched=()=>{clearTimeout(t); t=setTimeout(run,200);};
+  new MutationObserver(ms=>{ if(ms.some(m=>!(m.target.closest&&m.target.closest('.sgnote,abbr.sg')))) sched(); })
+    .observe(document.body,{childList:true,subtree:true,characterData:true});
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',sched); else sched();
+})();
+</script>
 </html>
