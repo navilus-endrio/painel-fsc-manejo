@@ -1273,24 +1273,24 @@ th.sortable[aria-sort="descending"]::after { content: ' \2193'; opacity: 1; }
           <li>Mapear a PFI da UMF com o mapa de 01/01/2017 (9.1.2, p. 56).</li>
           <li>Calcular a área central mínima, 10/20/30% (9.2.4.1, p. 56).</li>
           <li>Verificar se a conectividade (9.2.7) é possível sem revisar o zoneamento aprovado (p. 58).</li>
-          <li>Planejar as ações na esfera de influência (9.2.8, p. 58).</li>
+          <li>Planejar as ações na esfera de influência (9.2.8, p. 58–59).</li>
         </ul>
         <p class="src">Prazo: 18 meses a partir de 18/08/2026 (p. 3).</p></div>
       <div class="panel acao"><h3>Primeira certificação</h3>
         <ul>
-          <li>Inventário pré-exploratório de 100% e EIR conforme CONAMA 406/2009 (9.2.5, p. 57).</li>
+          <li>Exploração e estradas só fora da área central, com EIR conforme CONAMA 406/2009, inclusive inventário pré-exploratório de 100% (9.2.5, p. 57–58).</li>
           <li>Rede de áreas de conservação ligada à PFI, com análise de SIG (9.2.7, p. 58).</li>
-          <li>Regra de 51% se a UMF estiver fora da Amazônia Legal (9.2.4.1, p. 56).</li>
-          <li>Manter nenhuma PFI abaixo de 50.000 ha na paisagem (9.2.5, p. 57).</li>
+          <li>Área central mínima de 51% da PFI se a UMF estiver fora da Amazônia Legal (9.2.4.1, p. 56–57).</li>
+          <li>Não reduzir nenhuma PFI abaixo de 50.000 ha na paisagem (9.2.5, p. 57).</li>
         </ul>
-        <p class="src">O 9.2.7 se aplica integralmente a novos detentores.</p></div>
+        <p class="src">O 9.2.7 se aplica a novos detentores de certificado (p. 58).</p></div>
       <div class="panel acao"><h3>SLIMF</h3>
         <ul>
           <li>Confirmar o enquadramento na Tabela 1 (p. 12).</li>
-          <li>O 9.2.8 é NÃO-SLIMF, então não se aplica a SLIMF (p. 58).</li>
-          <li>Ler a nota de aplicabilidade de cada indicador de PFI antes de dispensar.</li>
+          <li>O 9.2.8 (esfera de influência) é marcado NÃO-SLIMF, então não se aplica a SLIMF (p. 58).</li>
+          <li>Os indicadores 9.2.4.1, 9.2.5 e 9.2.7 não têm marca SLIMF/NÃO-SLIMF no texto; na leitura do PDF valem também para SLIMF (p. 56–58).</li>
         </ul>
-        <p class="src">Pergunte ao organismo de certificação em caso de dúvida.</p></div>
+        <p class="src">Confirme a interpretação com o organismo de certificação.</p></div>
     </div>
   </div>
 </section>
@@ -1362,7 +1362,7 @@ th.sortable[aria-sort="descending"]::after { content: ' \2193'; opacity: 1; }
         <label class="btn-map" for="umf-file">Carregar GeoJSON da UMF</label>
         <input id="umf-file" type="file" accept=".geojson,.json,application/geo+json,application/json" hidden>
         <button type="button" class="btn-map" id="umf-clear" hidden>Limpar UMF</button>
-        <span class="map-lyr"><b class="lyr-h">Camadas (5)</b><label><input type="checkbox" id="lyr-cls" checked> Aptidão (Muito apta = IFL 2020)</label>
+        <span class="map-lyr"><b class="lyr-h">Camadas (5)</b><label><input type="checkbox" id="lyr-cls" checked> Aptidão</label>
         <label><input type="checkbox" id="lyr-ifl" checked> PFI (IFL 2020)</label>
         <label><input type="checkbox" id="lyr-bac"> Sub-bacias (ANA)</label>
         <label><input type="checkbox" id="lyr-uf" checked> UFs (IBGE)</label>
@@ -1394,7 +1394,7 @@ th.sortable[aria-sort="descending"]::after { content: ' \2193'; opacity: 1; }
       <details class="lim"><summary>Limitações da análise (7)</summary>
         <ol>
           <li>A PFI usa o <b>IFL 2020</b> (Intact Forest Landscapes) como aproximação; a norma pede o mapa de PFI de 01/01/2017.</li>
-          <li>A aptidão é a camada “Aptidão (Muito apta = IFL 2020)”: Muito apta é o IFL 2020; Apta e Pouco apta vêm da vetorização da figura do Anexo H (escala 1:15.000.000, erro de cerca de 10 km, leste do Tocantins fora da área colorida), não do dado original. Por isso toda PFI (IFL) cai em Muito apta, 10%, o que difere da norma. Use o shapefile oficial do FSC.</li>
+          <li>A camada “Aptidão” tem a classe Muito apta igual ao IFL 2020; Apta e Pouco apta vêm da vetorização da figura do Anexo H (escala 1:15.000.000, erro de cerca de 10 km, leste do Tocantins fora da área colorida), não do dado original. Por isso toda PFI (IFL) cai em Muito apta, 10%, o que difere da norma. Use o shapefile oficial do FSC.</li>
           <li>Se a UMF cruza limites de paisagem, a norma manda usar a <b>paisagem predominante</b>; o painel mede por classe, proporcionalmente.</li>
           <li>O IFL está simplificado (~1 km); os números por UMF servem como triagem, não como laudo.</li>
           <li>Áreas pela esfera (raio 6.371 km), cerca de 0,3% de diferença para o elipsoide.</li>
